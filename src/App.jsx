@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import FinanceDashboard from './components/FinanceDashboard'
 import LoginPage from './components/LoginPage'
+import SignupPage from './components/signupPage'
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [authView, setAuthView] = useState('login')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -34,7 +36,11 @@ const App = () => {
   }
 
   if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />
+    return authView === 'login' ? (
+      <LoginPage onLogin={handleLogin} onSwitchToSignup={() => setAuthView('signup')} />
+    ) : (
+      <SignupPage onSignup={handleLogin} onSwitchToLogin={() => setAuthView('login')} />
+    )
   }
 
   return <FinanceDashboard onLogout={handleLogout} />

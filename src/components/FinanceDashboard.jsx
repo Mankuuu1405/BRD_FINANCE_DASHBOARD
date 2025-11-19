@@ -205,6 +205,28 @@ const FinanceDashboard = ({ onLogout }) => {
   const [selectedRepaymentId, setSelectedRepaymentId] = useState(null)
   const [showNotificationModal, setShowNotificationModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
+  const [showTenantModal, setShowTenantModal] = useState(false)
+  const [showReportsModal, setShowReportsModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [showManageDisbursementModal, setShowManageDisbursementModal] = useState(false)
+  const [selectedDisbursement, setSelectedDisbursement] = useState(null)
+  const [tenants, setTenants] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tenants')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+  const [tenantForm, setTenantForm] = useState({ name: '', type: 'Bank', email: '', active: true })
+  const [settings, setSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('settings')
+      return saved ? JSON.parse(saved) : { emailNotifications: true, smsNotifications: false }
+    } catch {
+      return { emailNotifications: true, smsNotifications: false }
+    }
+  })
 
   const loadDashboard = useCallback(async () => {
     try {
@@ -596,6 +618,59 @@ const FinanceDashboard = ({ onLogout }) => {
     loadRepaymentData()
   }
 
+  const handleQuickAction = (title) => {
+    if (title === 'Add Tenant') setShowTenantModal(true)
+    else if (title === 'View Reports') setShowReportsModal(true)
+    else if (title === 'System Settings') setShowSettingsModal(true)
+    else if (title === 'Notifications') setShowNotificationModal(true)
+  }
+
+  const handleAddTenantSubmit = () => {
+    if (!tenantForm.name || !tenantForm.email) {
+      alert('Please enter tenant name and email')
+      return
+    }
+    const list = [...tenants, { id: Date.now(), ...tenantForm }]
+    setTenants(list)
+    try {
+      localStorage.setItem('tenants', JSON.stringify(list))
+    } catch {}
+    setShowTenantModal(false)
+    setTenantForm({ name: '', type: 'Bank', email: '', active: true })
+    alert('Tenant added')
+  }
+
+  const handleSaveSettings = (next) => {
+    const merged = { ...settings, ...next }
+    setSettings(merged)
+    try {
+      localStorage.setItem('settings', JSON.stringify(merged))
+    } catch {}
+    setShowSettingsModal(false)
+    alert('Settings saved')
+  }
+
+  const handleManageDisbursement = (row) => {
+    setSelectedDisbursement(row)
+    setShowManageDisbursementModal(true)
+  }
+
+  const updateDisbursementStatus = (newStatus) => {
+    setDisbursementData((prev) => {
+      const snapshot = prev ?? mockDashboard.disbursement
+      const updated = {
+        ...snapshot,
+        allDisbursements: snapshot.allDisbursements.map((d) =>
+          d.disbursementId === selectedDisbursement.disbursementId ? { ...d, status: newStatus } : d
+        ),
+      }
+      return updated
+    })
+    setShowManageDisbursementModal(false)
+    setSelectedDisbursement(null)
+    alert(`Status updated to ${newStatus}`)
+  }
+
   return (
     <div className="flex min-h-screen bg-brand-surface">
       <aside className="hidden w-64 flex-col border-r border-brand-border bg-brand-nav lg:flex">
@@ -638,7 +713,6 @@ const FinanceDashboard = ({ onLogout }) => {
       </aside>
 
       <main className="flex-1 px-4 py-8 sm:px-6 lg:px-10">
-        {/* Fixed Header Actions - Always in same position */}
         <div className="fixed right-4 top-4 z-50 flex items-center gap-3 lg:right-10">
           <button
             onClick={handleRefresh}
@@ -703,7 +777,6 @@ const FinanceDashboard = ({ onLogout }) => {
               <h1 className="text-4xl font-semibold text-brand-text">{headerCopy.title}</h1>
               <p className="text-sm text-brand-text/60">{headerCopy.subtitle}</p>
             </div>
-            {/* Spacer to prevent content overlap with fixed buttons */}
             <div className="w-[600px] lg:w-[650px]" />
           </header>
 
@@ -737,6 +810,7 @@ const FinanceDashboard = ({ onLogout }) => {
                     {QUICK_ACTIONS.map((action) => (
                       <button
                         key={action.title}
+                        onClick={() => handleQuickAction(action.title)}
                         className={`rounded-2xl border border-brand-border bg-gradient-to-br px-4 py-5 text-left transition hover:-translate-y-0.5 hover:border-brand-accent hover:shadow ${action.accent}`}
                       >
                         <p className="text-sm font-semibold">{action.title}</p>
@@ -1059,7 +1133,7 @@ const FinanceDashboard = ({ onLogout }) => {
                           </td>
                           <td className="py-3 pr-4">{row.paymentMethod}</td>
                           <td className="py-3">
-                            <button className="rounded-full border border-brand-border px-3 py-1 text-xs font-semibold text-brand-text transition hover:border-brand-accent">
+                            <button onClick={() => handleManageDisbursement(row)} className="rounded-full border border-brand-border px-3 py-1 text-xs font-semibold text-brand-text transition hover:border-brand-accent">
                               Manage
                             </button>
                           </td>
@@ -1686,11 +1760,145 @@ const FinanceDashboard = ({ onLogout }) => {
         isOpen={showNotificationModal}
         onClose={() => setShowNotificationModal(false)}
       />
+      {/* Tenant Modal */}
+      {showTenantModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowTenantModal(false)}>
+          <div className="w-full max-w-lg rounded-2xl border border-brand-border bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-brand-text">Add Tenant</h2>
+              <button onClick={() => setShowTenantModal(false)} className="rounded-full p-1 text-brand-text/60 transition hover:bg-brand-border hover:text-brand-text">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="space-y-4 px-6 py-4">
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-brand-text">Name</label>
+                <input type="text" value={tenantForm.name} onChange={(e) => setTenantForm({ ...tenantForm, name: e.target.value })} className="w-full rounded-lg border border-brand-border px-3 py-2 text-sm text-brand-text focus:border-brand-accent focus:outline-none" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-brand-text">Type</label>
+                <select value={tenantForm.type} onChange={(e) => setTenantForm({ ...tenantForm, type: e.target.value })} className="w-full rounded-lg border border-brand-border px-3 py-2 text-sm text-brand-text focus:border-brand-accent focus:outline-none">
+                  <option>Bank</option>
+                  <option>NBFC</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-brand-text">Contact Email</label>
+                <input type="email" value={tenantForm.email} onChange={(e) => setTenantForm({ ...tenantForm, email: e.target.value })} className="w-full rounded-lg border border-brand-border px-3 py-2 text-sm text-brand-text focus:border-brand-accent focus:outline-none" />
+              </div>
+              <div className="flex items-center gap-2">
+                <input id="tenant-active" type="checkbox" checked={tenantForm.active} onChange={(e) => setTenantForm({ ...tenantForm, active: e.target.checked })} />
+                <label htmlFor="tenant-active" className="text-sm text-brand-text">Active</label>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 border-t border-brand-border px-6 py-4">
+              <button onClick={() => setShowTenantModal(false)} className="rounded-lg border border-brand-border px-4 py-2 text-sm font-semibold text-brand-text">Cancel</button>
+              <button onClick={handleAddTenantSubmit} className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">Save Tenant</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Reports Modal */}
+      {showReportsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowReportsModal(false)}>
+          <div className="w-full max-w-md rounded-2xl border border-brand-border bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-brand-text">View Reports</h2>
+              <button onClick={() => setShowReportsModal(false)} className="rounded-full p-1 text-brand-text/60 transition hover:bg-brand-border hover:text-brand-text">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="space-y-4 px-6 py-4">
+              <p className="text-sm text-slate-600">Choose a report to download</p>
+              <button onClick={() => { setShowReportsModal(false); handleGenerateReport() }} className="w-full rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">Finance Summary (PDF)</button>
+              <button onClick={() => { setShowReportsModal(false); handleDownloadReport() }} className="w-full rounded-lg border border-brand-border px-4 py-2 text-sm font-semibold text-brand-text transition hover:border-brand-accent">Repayment Report (XLSX)</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowSettingsModal(false)}>
+          <div className="w-full max-w-md rounded-2xl border border-brand-border bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-brand-text">System Settings</h2>
+              <button onClick={() => setShowSettingsModal(false)} className="rounded-full p-1 text-brand-text/60 transition hover:bg-brand-border hover:text-brand-text">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="space-y-4 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-brand-text">Email Notifications</p>
+                  <p className="text-xs text-slate-500">Receive alerts via email</p>
+                </div>
+                <input type="checkbox" checked={settings.emailNotifications} onChange={(e) => setSettings({ ...settings, emailNotifications: e.target.checked })} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-brand-text">SMS Notifications</p>
+                  <p className="text-xs text-slate-500">Receive alerts via SMS</p>
+                </div>
+                <input type="checkbox" checked={settings.smsNotifications} onChange={(e) => setSettings({ ...settings, smsNotifications: e.target.checked })} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 border-t border-brand-border px-6 py-4">
+              <button onClick={() => setShowSettingsModal(false)} className="rounded-lg border border-brand-border px-4 py-2 text-sm font-semibold text-brand-text">Cancel</button>
+              <button onClick={() => handleSaveSettings({})} className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">Save Settings</button>
+            </div>
+          </div>
+        </div>
+      )}
       <ProfileModal
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
         onLogout={onLogout}
       />
+      {showManageDisbursementModal && selectedDisbursement && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowManageDisbursementModal(false)}>
+          <div className="w-full max-w-lg rounded-2xl border border-brand-border bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-brand-text">Manage Disbursement</h2>
+              <button onClick={() => setShowManageDisbursementModal(false)} className="rounded-full p-1 text-brand-text/60 transition hover:bg-brand-border hover:text-brand-text">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="space-y-4 px-6 py-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="font-semibold text-brand-text">Disbursement ID</p>
+                  <p className="text-slate-600">{selectedDisbursement.disbursementId}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-brand-text">Loan ID</p>
+                  <p className="text-slate-600">{selectedDisbursement.loanId}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-brand-text">Recipient</p>
+                  <p className="text-slate-600">{selectedDisbursement.recipientName}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-brand-text">Amount</p>
+                  <p className="text-slate-600">{formatCurrency(selectedDisbursement.amount)}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-brand-text">Status</p>
+                  <p className="text-slate-600">{selectedDisbursement.status}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-brand-text">Method</p>
+                  <p className="text-slate-600">{selectedDisbursement.paymentMethod}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <button onClick={() => updateDisbursementStatus('Pending')} className="rounded-lg border border-brand-border px-4 py-2 text-sm font-semibold text-brand-text transition hover:border-brand-accent">Mark Pending</button>
+                <button onClick={() => updateDisbursementStatus('Paid')} className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">Mark Paid</button>
+                <button onClick={() => updateDisbursementStatus('Failed')} className="rounded-lg border border-brand-border px-4 py-2 text-sm font-semibold text-brand-text transition hover:border-brand-accent">Mark Failed</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
