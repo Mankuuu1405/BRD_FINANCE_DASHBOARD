@@ -1,28 +1,33 @@
+// /Users/ayushpc/Desktop/Finance-team/src/components/SignupPage.jsx
 import { useState } from 'react'
 
-const LoginPage = ({ onLogin, onSwitchToSignup }) => {
+const SignupPage = ({ onSignup, onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-
-    // Simulate API call
     setTimeout(() => {
-      if (formData.email && formData.password) {
-        // Store auth token (in real app, this would come from API)
-        localStorage.setItem('authToken', 'mock-token')
-        localStorage.setItem('userEmail', formData.email)
-        onLogin()
-      } else {
-        setError('Please enter both email and password')
+      if (!formData.email || !formData.password || !formData.confirmPassword) {
+        setError('Please fill in all fields')
+        setLoading(false)
+        return
       }
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match')
+        setLoading(false)
+        return
+      }
+      localStorage.setItem('authToken', 'mock-token')
+      localStorage.setItem('userEmail', formData.email)
+      onSignup()
       setLoading(false)
     }, 500)
   }
@@ -36,8 +41,8 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
               <path d="M12 3l8 4v5c0 5-3 7-8 9-5-2-8-4-8-9V7z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-semibold text-brand-text">Finance Dashboard</h1>
-          <p className="mt-2 text-sm text-slate-500">Sign in to access your dashboard</p>
+          <h1 className="text-3xl font-semibold text-brand-text">Create your account</h1>
+          <p className="mt-2 text-sm text-slate-500">Sign up to access your dashboard</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -47,12 +52,11 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="admin@los.com"
+              placeholder="you@example.com"
               required
               className="w-full rounded-lg border border-brand-border px-4 py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
             />
           </div>
-
           <div>
             <label className="mb-2 block text-sm font-semibold text-brand-text">Password</label>
             <input
@@ -64,24 +68,32 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
               className="w-full rounded-lg border border-brand-border px-4 py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
             />
           </div>
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-brand-text">Confirm Password</label>
+            <input
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              placeholder="Re-enter your password"
+              required
+              className="w-full rounded-lg border border-brand-border px-4 py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+            />
+          </div>
 
-          {error && (
-            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
-          )}
+          {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full rounded-lg bg-brand-accent px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:bg-indigo-500 disabled:opacity-50"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
 
         <div className="mt-6 text-center text-xs text-slate-500">
-          <p>Demo: Use any email and password to login</p>
-          <button type="button" onClick={onSwitchToSignup} className="mt-2 text-indigo-600 hover:underline">
-            Don't have an account? Sign Up
+          <button type="button" onClick={onSwitchToLogin} className="text-indigo-600 hover:underline">
+            Already have an account? Sign In
           </button>
         </div>
       </div>
@@ -89,5 +101,4 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
   )
 }
 
-export default LoginPage
-
+export default SignupPage
