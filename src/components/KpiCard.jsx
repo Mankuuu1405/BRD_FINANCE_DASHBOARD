@@ -51,15 +51,15 @@ const KpiCard = ({
 
   return (
     <div className="rounded-2xl border border-brand-border bg-brand-panel p-5 shadow-glow">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className={`mt-3 text-3xl font-semibold ${valueClass}`}>{formattedValue}</p>
+      <div className="relative">
+        <p className="pr-20 sm:pr-24 text-sm font-medium text-slate-500 break-normal whitespace-normal leading-5">{label}</p>
+        <div className="absolute right-0 top-0">
+          <TrendBadge trend={typeof trend === 'number' ? trend : null} />
         </div>
-        <TrendBadge trend={typeof trend === 'number' ? trend : null} />
       </div>
+      <p className={`mt-2 text-3xl font-semibold ${valueClass}`}>{formattedValue}</p>
       {helper ? (
-        <p className="mt-4 text-xs text-brand-text/60">{helper}</p>
+        <p className="mt-2 text-xs text-brand-text/60">{helper}</p>
       ) : null}
     </div>
   )

@@ -673,8 +673,8 @@ const FinanceDashboard = ({ onLogout }) => {
 
   return (
     <div className="flex min-h-screen bg-brand-surface">
-      <aside className="hidden w-64 flex-col border-r border-brand-border bg-brand-nav lg:flex">
-        <div className="flex items-center gap-3 px-6 py-6">
+      <aside className="fixed inset-y-0 left-0 z-40 w-64 flex flex-col border-r border-brand-border bg-white">
+        <div className="flex items-center gap-3 px-6 py-4">
           <div className="rounded-full bg-indigo-100 p-3 text-indigo-600">
             <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor">
               <path d="M12 3l8 4v5c0 5-3 7-8 9-5-2-8-4-8-9V7z" strokeWidth={1.8} />
@@ -685,7 +685,7 @@ const FinanceDashboard = ({ onLogout }) => {
             <p className="text-lg font-semibold text-brand-text">Finance Dashboard</p>
           </div>
         </div>
-        <nav className="mt-4 flex-1 space-y-1 px-4">
+        <nav className="mt-2 space-y-1 px-4">
           {NAV_ITEMS.map((item) => {
             const isActive = activeView === item.key
             return (
@@ -710,75 +710,88 @@ const FinanceDashboard = ({ onLogout }) => {
             )
           })}
         </nav>
-      </aside>
-
-      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-10">
-        <div className="fixed right-4 top-4 z-50 flex items-center gap-3 lg:right-10">
+        <div className="mt-0 px-4 py-0 space-y-1">
           <button
-            onClick={handleRefresh}
-            disabled={refreshInProgress}
-            className="rounded-full border border-brand-border bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-brand-accent hover:text-brand-accent disabled:opacity-50"
+            onClick={() => handleQuickAction('Add Tenant')}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition text-brand-text/70 hover:bg-white"
           >
-            {refreshInProgress ? 'Refreshing…' : 'Refresh'}
+            <span className="text-brand-text/60">{navIcon('users')}</span>
+            Add Tenant
           </button>
           <button
-            onClick={handleGenerateReport}
-            disabled={reportState.loading}
-            className="rounded-full bg-brand-accent px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:bg-indigo-500 disabled:opacity-50"
+            onClick={() => handleQuickAction('View Reports')}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition text-brand-text/70 hover:bg-white"
           >
-            {reportState.loading ? 'Generating…' : 'Export Report'}
+            <span className="text-brand-text/60">{navIcon('analytics')}</span>
+            View Reports
           </button>
           <button
-            onClick={() => setShowNotificationModal(true)}
-            aria-label="Notifications"
-            className="relative rounded-full border border-brand-border bg-white p-2 text-brand-text shadow-sm transition hover:border-brand-accent"
+            onClick={() => handleQuickAction('System Settings')}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition text-brand-text/70 hover:bg-white"
           >
-            {navIcon('bell')}
-            <span className="absolute right-1 top-1 block h-2 w-2 rounded-full bg-brand-danger" />
+            <span className="text-brand-text/60">{navIcon('settings')}</span>
+            System Settings
           </button>
+        </div>
+        <div className="mt-auto px-6 py-6">
           <button
-            onClick={() => setShowProfileModal(true)}
-            className="flex items-center gap-3 rounded-full border border-brand-border bg-white px-3 py-1.5 shadow-sm transition hover:border-brand-accent"
-          >
-            <div className="text-right">
-              <p className="text-xs font-semibold text-slate-500">Finance Dashboard</p>
-              <p className="text-sm font-semibold text-brand-text">
-                {localStorage.getItem('userEmail') || 'admin@los.com'}
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-indigo-100 text-center text-base font-semibold leading-10 text-indigo-700">
-              {(() => {
-                const email = localStorage.getItem('userEmail') || 'admin@los.com'
-                const name = email.split('@')[0] || 'Admin'
-                return name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .toUpperCase()
-                  .slice(0, 2)
-              })()}
-            </div>
-          </button>
-          <button
-            onClick={() => {
-              if (onLogout) {
-                onLogout()
-              }
-            }}
-            className="rounded-full border border-brand-border bg-white px-3 py-1.5 text-sm font-semibold text-brand-text shadow-sm transition hover:border-brand-accent"
+            onClick={() => onLogout && onLogout()}
+            className="text-sm font-semibold text-red-600 hover:text-red-700"
           >
             Logout
           </button>
         </div>
+      </aside>
 
-        <div className="mx-auto max-w-[1200px] space-y-8">
-          <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-brand-border bg-brand-panel px-6 py-8 shadow-glow">
-            <div className="space-y-2">
-              <h1 className="text-4xl font-semibold text-brand-text">{headerCopy.title}</h1>
-              <p className="text-sm text-brand-text/60">{headerCopy.subtitle}</p>
+      <main className="ml-64 flex-1 px-4 py-0 sm:px-6 lg:px-10">
+        <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-10 flex items-center justify-between border-b border-brand-border bg-white px-4 sm:px-6 lg:px-10 py-2">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold text-brand-text">Finance Dashboard</h1>
+              <p className="text-sm text-slate-500">LOS Platform Overview</p>
+          </div>
+          <div className="flex items-center gap-3 flex-nowrap">
+              <button
+                onClick={handleGenerateReport}
+                disabled={reportState.loading}
+                className="rounded-full border border-brand-border bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-brand-accent"
+              >
+                {reportState.loading ? 'Generating…' : 'Export Report'}
+              </button>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshInProgress}
+                className="rounded-full bg-brand-accent px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:bg-indigo-500 disabled:opacity-50"
+              >
+                {refreshInProgress ? 'Refreshing…' : 'Refresh'}
+              </button>
+              <div className="hidden h-8 w-px bg-brand-border md:block" />
+              <button
+                onClick={() => setShowProfileModal(true)}
+                aria-label="Profile"
+                className="h-9 w-9 rounded-full border border-brand-border overflow-hidden bg-indigo-100 text-center text-sm font-semibold leading-9 text-indigo-700"
+              >
+                {(() => {
+                  const img = localStorage.getItem('profileImage')
+                  if (img) {
+                    return (
+                      <img src={img} alt="Profile" className="h-9 w-9 object-cover" />
+                    )
+                  }
+                  const displayName = localStorage.getItem('displayName')
+                  const email = localStorage.getItem('userEmail') || 'admin@los.com'
+                  const source = displayName || email.split('@')[0] || 'Admin'
+                  return source
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2)
+                })()}
+              </button>
             </div>
-            <div className="w-[600px] lg:w-[650px]" />
-          </header>
+        </div>
+
+        <div className="mx-auto max-w-[1000px] space-y-4">
 
           {activeView === 'overview' ? (
             <>
@@ -798,7 +811,7 @@ const FinanceDashboard = ({ onLogout }) => {
                 })}
               </section>
 
-              <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
+              <section className="grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
                 <div className="rounded-2xl border border-brand-border bg-brand-panel p-5 shadow-glow">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
@@ -855,7 +868,7 @@ const FinanceDashboard = ({ onLogout }) => {
                 </div>
               </section>
 
-              <section className="grid gap-6 lg:grid-cols-2">
+              <section className="grid gap-4 lg:grid-cols-2">
                 <ChartCard
                   title="Disbursement Trends"
                   subtitle="Monthly disbursements (₹ in Millions)"
