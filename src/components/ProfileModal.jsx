@@ -36,7 +36,7 @@ const ProfileModal = ({ isOpen, onClose, onLogout }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end p-4 pt-20" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-start justify-end p-4 pt-20 bg-black/30 backdrop-blur-sm" onClick={onClose}>
       <div
         className="w-full max-w-sm rounded-2xl border border-brand-border bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
@@ -183,4 +183,3 @@ const ProfileModal = ({ isOpen, onClose, onLogout }) => {
 }
 
 export default ProfileModal
-

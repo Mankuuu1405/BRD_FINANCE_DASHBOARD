@@ -685,14 +685,14 @@ const FinanceDashboard = ({ onLogout }) => {
             <p className="text-lg font-semibold text-brand-text">Finance Dashboard</p>
           </div>
         </div>
-        <nav className="mt-2 space-y-1 px-4">
+        <nav className="mt-2 space-y-2 px-4">
           {NAV_ITEMS.map((item) => {
             const isActive = activeView === item.key
             return (
               <button
                 key={item.label}
                 onClick={() => setActiveView(item.key)}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
+                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-base font-semibold transition ${
                   isActive
                     ? 'bg-brand-accent text-white shadow-sm'
                     : 'text-brand-text/70 hover:bg-white'
@@ -710,24 +710,24 @@ const FinanceDashboard = ({ onLogout }) => {
             )
           })}
         </nav>
-        <div className="mt-0 px-4 py-0 space-y-1">
+        <div className="mt-0 px-4 py-0 space-y-2">
           <button
             onClick={() => handleQuickAction('Add Tenant')}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition text-brand-text/70 hover:bg-white"
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-base font-semibold transition text-brand-text/70 hover:bg-white"
           >
             <span className="text-brand-text/60">{navIcon('users')}</span>
             Add Tenant
           </button>
           <button
             onClick={() => handleQuickAction('View Reports')}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition text-brand-text/70 hover:bg-white"
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-base font-semibold transition text-brand-text/70 hover:bg-white"
           >
             <span className="text-brand-text/60">{navIcon('analytics')}</span>
             View Reports
           </button>
           <button
             onClick={() => handleQuickAction('System Settings')}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition text-brand-text/70 hover:bg-white"
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-base font-semibold transition text-brand-text/70 hover:bg-white"
           >
             <span className="text-brand-text/60">{navIcon('settings')}</span>
             System Settings
@@ -932,19 +932,22 @@ const FinanceDashboard = ({ onLogout }) => {
 
               <section className="grid gap-6 lg:grid-cols-2">
                 <ChartCard
+                  compact
                   title="Payment Status Distribution"
                   subtitle="Share of outstanding loans by repayment status"
                 >
-                  <div className="flex flex-col items-center gap-4 lg:flex-row">
-                    <div className="h-72 w-full lg:w-1/2">
-                      <ResponsiveContainer>
-                        <PieChart>
+                  <div className="flex flex-col items-center gap-3 lg:flex-row">
+                    <div className="aspect-square w-full lg:w-[22rem] xl:w-[26rem] mx-auto">
+                      <ResponsiveContainer width="100%" aspect={1}>
+                        <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
                           <Pie
                             data={paymentStatusDistribution}
                             dataKey="value"
                             nameKey="status"
-                            innerRadius={70}
-                            outerRadius={110}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={0}
+                            outerRadius={"85%"}
                             stroke="none"
                           >
                             {paymentStatusDistribution.map((entry) => (
@@ -971,19 +974,22 @@ const FinanceDashboard = ({ onLogout }) => {
                 </ChartCard>
 
                 <ChartCard
+                  compact
                   title="Loan Portfolio Composition"
                   subtitle="Outstanding value grouped by loan purpose"
                 >
-                  <div className="flex flex-col items-center gap-4 lg:flex-row">
-                    <div className="h-72 w-full lg:w-1/2">
-                      <ResponsiveContainer>
-                        <PieChart>
+                  <div className="flex flex-col items-center gap-3 lg:flex-row">
+                    <div className="aspect-square w-full lg:w-[22rem] xl:w-[26rem] mx-auto">
+                      <ResponsiveContainer width="100%" aspect={1}>
+                        <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
                           <Pie
                             data={loanPortfolioComposition}
                             dataKey="value"
                             nameKey="type"
-                            innerRadius={70}
-                            outerRadius={110}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={0}
+                            outerRadius={"85%"}
                             stroke="none"
                           >
                             {loanPortfolioComposition.map((entry) => (
@@ -1066,19 +1072,22 @@ const FinanceDashboard = ({ onLogout }) => {
                 </ChartCard>
 
                 <ChartCard
+                  compact
                   title="Status Distribution"
                   subtitle="Share of transactions by current status"
                 >
-                  <div className="flex flex-col items-center gap-4 lg:flex-row">
-                    <div className="h-72 w-full lg:w-1/2">
-                      <ResponsiveContainer>
-                        <PieChart>
+                  <div className="flex flex-col items-center gap-3 lg:flex-row">
+                    <div className="aspect-square w-full lg:w-[22rem] xl:w-[26rem] mx-auto">
+                      <ResponsiveContainer width="100%" aspect={1}>
+                        <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
                           <Pie
                             data={disbursementStatusDistribution}
                             dataKey="count"
                             nameKey="status"
-                            innerRadius={70}
-                            outerRadius={110}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={0}
+                            outerRadius={"85%"}
                             stroke="none"
                           >
                             {disbursementStatusDistribution.map((entry) => (
@@ -1301,21 +1310,24 @@ const FinanceDashboard = ({ onLogout }) => {
                       </div>
                     ) : null}
 
-                    <section className="grid gap-6 lg:grid-cols-2">
+                    <section className="grid gap-6">
                       <ChartCard
+                        compact
                         title="Status Distribution"
                         subtitle="Transaction status breakdown"
                       >
-                        <div className="flex flex-col items-center gap-4 lg:flex-row">
-                          <div className="h-72 w-full lg:w-1/2">
-                            <ResponsiveContainer>
-                              <PieChart>
+                        <div className="flex flex-col items-center gap-3 lg:flex-row">
+                          <div className="aspect-square w-full lg:w-[22rem] xl:w-[26rem] mx-auto">
+                            <ResponsiveContainer width="100%" aspect={1}>
+                              <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
                                 <Pie
                                   data={statusDistribution}
                                   dataKey="count"
                                   nameKey="status"
-                                  innerRadius={70}
-                                  outerRadius={110}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={0}
+                                  outerRadius={"85%"}
                                   stroke="none"
                                 >
                                   {statusDistribution.map((entry) => (
@@ -1775,7 +1787,7 @@ const FinanceDashboard = ({ onLogout }) => {
       />
       {/* Tenant Modal */}
       {showTenantModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowTenantModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={() => setShowTenantModal(false)}>
           <div className="w-full max-w-lg rounded-2xl border border-brand-border bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
               <h2 className="text-lg font-semibold text-brand-text">Add Tenant</h2>
@@ -1813,7 +1825,7 @@ const FinanceDashboard = ({ onLogout }) => {
       )}
       {/* Reports Modal */}
       {showReportsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowReportsModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={() => setShowReportsModal(false)}>
           <div className="w-full max-w-md rounded-2xl border border-brand-border bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
               <h2 className="text-lg font-semibold text-brand-text">View Reports</h2>
@@ -1831,7 +1843,7 @@ const FinanceDashboard = ({ onLogout }) => {
       )}
       {/* Settings Modal */}
       {showSettingsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowSettingsModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={() => setShowSettingsModal(false)}>
           <div className="w-full max-w-md rounded-2xl border border-brand-border bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
               <h2 className="text-lg font-semibold text-brand-text">System Settings</h2>
@@ -1917,4 +1929,3 @@ const FinanceDashboard = ({ onLogout }) => {
 }
 
 export default FinanceDashboard
-
