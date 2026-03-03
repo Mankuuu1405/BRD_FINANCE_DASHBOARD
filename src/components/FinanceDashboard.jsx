@@ -23,6 +23,7 @@ import NotificationModal from './NotificationModal'
 import ProfileModal from './ProfileModal'
 import { mockDashboard } from '../data/mockDashboard'
 import { formatCurrency, formatPercent } from '../utils/formatters'
+import apiService from '../services/api'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', key: 'overview' },
@@ -232,11 +233,7 @@ const FinanceDashboard = ({ onLogout }) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch('/api/v1/finance/dashboard')
-      if (!response.ok) {
-        throw new Error('Unable to reach finance dashboard API')
-      }
-      const payload = await response.json()
+      const payload = await apiService.getLegacyDashboard()
       setDashboardData(payload)
     } catch (err) {
       console.warn('[FinanceDashboard] Falling back to mock data:', err.message)
@@ -255,11 +252,7 @@ const FinanceDashboard = ({ onLogout }) => {
     try {
       setDisbursementLoading(true)
       setDisbursementError(null)
-      const response = await fetch('/api/v1/finance/disbursement/dashboard')
-      if (!response.ok) {
-        throw new Error('Unable to reach disbursement dashboard API')
-      }
-      const payload = await response.json()
+      const payload = await apiService.getDisbursementDashboard()
       setDisbursementData(payload)
     } catch (err) {
       console.warn('[FinanceDashboard] Falling back to disbursement mock data:', err.message)
@@ -280,17 +273,7 @@ const FinanceDashboard = ({ onLogout }) => {
     try {
       setReconciliationLoading(true)
       setReconciliationError(null)
-      const params = new URLSearchParams()
-      if (filters.descriptionQuery) params.append('descriptionQuery', filters.descriptionQuery)
-      if (filters.dateFrom) params.append('dateFrom', filters.dateFrom)
-      if (filters.dateTo) params.append('dateTo', filters.dateTo)
-      if (filters.statusFilter !== 'all') params.append('statusFilter', filters.statusFilter)
-
-      const response = await fetch(`/api/v1/finance/reconciliation/list?${params.toString()}`)
-      if (!response.ok) {
-        throw new Error('Unable to reach reconciliation API')
-      }
-      const payload = await response.json()
+      const payload = await apiService.getLegacyReconciliationList(filters)
       setReconciliationData(payload)
     } catch (err) {
       console.warn('[FinanceDashboard] Falling back to reconciliation mock data:', err.message)
@@ -316,17 +299,7 @@ const FinanceDashboard = ({ onLogout }) => {
     try {
       setRepaymentLoading(true)
       setRepaymentError(null)
-      const params = new URLSearchParams()
-      if (repaymentFilters.status) params.append('status', repaymentFilters.status)
-      if (repaymentFilters.dateFrom) params.append('dateFrom', repaymentFilters.dateFrom)
-      if (repaymentFilters.dateTo) params.append('dateTo', repaymentFilters.dateTo)
-      if (repaymentFilters.searchQuery) params.append('searchQuery', repaymentFilters.searchQuery)
-
-      const response = await fetch(`/api/v1/finance/repayments/list?${params.toString()}`)
-      if (!response.ok) {
-        throw new Error('Unable to reach repayment API')
-      }
-      const payload = await response.json()
+      const payload = await apiService.getLegacyRepaymentList(repaymentFilters)
       setRepaymentData(payload)
     } catch (err) {
       console.warn('[FinanceDashboard] Falling back to repayment mock data:', err.message)
@@ -372,17 +345,11 @@ const FinanceDashboard = ({ onLogout }) => {
     const displayStatus = statusMap[newStatus] || newStatus
 
     try {
-      const response = await fetch('/api/v1/finance/reconciliation/bulk-update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          transactionIds: Array.from(selectedTransactions),
-          newStatus,
-        }),
-      })
-      if (!response.ok) {
-        throw new Error('Bulk update failed')
-      }
+      const updates = Array.from(selectedTransactions).map(txnId => ({
+        transaction_id: parseInt(txnId),
+        status: newStatus
+      }))
+      await apiService.updateReconciliationBulk(updates)
       setSelectedTransactions(new Set())
       setShowBulkActions(false)
       loadReconciliationData()
@@ -422,28 +389,121 @@ const FinanceDashboard = ({ onLogout }) => {
   const handleGenerateReport = async () => {
     try {
       setReportState({ loading: true, message: null })
-      const response = await fetch('/api/v1/finance/report/generate')
-      if (!response.ok) {
-        throw new Error('Report download failed')
-      }
-      const blob = await response.blob()
-      const disposition = response.headers.get('Content-Disposition')
-      const match = disposition?.match(/filename="?(.+)"?/)
-      const fallbackName = `finance-report-${new Date().toISOString().slice(0, 10)}.pdf`
-      const fileName = match?.[1] ?? fallbackName
-
+      const report = await apiService.generateReport()
+      
+      // Format report as HTML with styling
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Finance Summary Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+    h1 { color: #333; border-bottom: 3px solid #6366f1; padding-bottom: 10px; }
+    h2 { color: #555; margin-top: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0; }
+    .card { background: #f9f9f9; padding: 15px; border-left: 4px solid #6366f1; }
+    .label { font-weight: bold; color: #666; font-size: 12px; text-transform: uppercase; }
+    .value { font-size: 24px; color: #333; margin: 5px 0; }
+    .unit { font-size: 14px; color: #999; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #999; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Finance Summary Report</h1>
+    <p>Generated: ${new Date(report.reportData.generatedAt).toLocaleString()}</p>
+    
+    <h2>Overall Summary</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Total Loans</div>
+        <div class="value">${report.reportData.summary.totalLoans}</div>
+      </div>
+      <div class="card">
+        <div class="label">Total Disbursed</div>
+        <div class="value">₹${report.reportData.summary.totalDisbursed.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+      </div>
+      <div class="card">
+        <div class="label">Pending Disbursements</div>
+        <div class="value">₹${report.reportData.summary.pendingDisbursements.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+      </div>
+      <div class="card">
+        <div class="label">Collection Rate</div>
+        <div class="value">${report.reportData.summary.collectionRate}%</div>
+      </div>
+      <div class="card">
+        <div class="label">Total Repayments Due</div>
+        <div class="value">₹${report.reportData.summary.totalRepaymentsDue.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+      </div>
+      <div class="card">
+        <div class="label">Total Repayments Paid</div>
+        <div class="value">₹${report.reportData.summary.totalRepaymentsPaid.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+      </div>
+    </div>
+    
+    <h2>Disbursement Summary</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Total Disbursements</div>
+        <div class="value">${report.reportData.disbursementSummary.total}</div>
+      </div>
+      <div class="card">
+        <div class="label">Paid</div>
+        <div class="value">${report.reportData.disbursementSummary.paid}</div>
+      </div>
+      <div class="card">
+        <div class="label">Pending</div>
+        <div class="value">${report.reportData.disbursementSummary.pending}</div>
+      </div>
+      <div class="card">
+        <div class="label">Failed</div>
+        <div class="value">${report.reportData.disbursementSummary.failed}</div>
+      </div>
+    </div>
+    
+    <h2>Repayment Summary</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Total Repayments</div>
+        <div class="value">${report.reportData.repaymentSummary.total}</div>
+      </div>
+      <div class="card">
+        <div class="label">Paid</div>
+        <div class="value">${report.reportData.repaymentSummary.paid}</div>
+      </div>
+      <div class="card">
+        <div class="label">Pending</div>
+        <div class="value">${report.reportData.repaymentSummary.pending}</div>
+      </div>
+      <div class="card">
+        <div class="label">Overdue</div>
+        <div class="value">${report.reportData.repaymentSummary.overdue}</div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>This is an automatically generated report. Please verify all data before making decisions.</p>
+    </div>
+  </div>
+</body>
+</html>`
+      
+      const blob = new Blob([html], { type: 'text/html' })
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', fileName)
+      link.setAttribute('download', `finance-summary-${new Date().toISOString().slice(0, 10)}.html`)
       document.body.appendChild(link)
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
-
-      setReportState({ loading: false, message: 'Report downloaded successfully.' })
+      
+      setReportState({ loading: false, message: 'Finance Summary downloaded successfully!' })
     } catch (err) {
-      setReportState({ loading: false, message: 'Unable to download report right now.' })
+      console.warn('[FinanceDashboard] Report generation failed:', err.message)
+      setReportState({ loading: false, message: 'Unable to generate report right now.' })
     }
   }
 
@@ -573,12 +633,7 @@ const FinanceDashboard = ({ onLogout }) => {
 
   const handleSendReminder = async (repaymentId) => {
     try {
-      const response = await fetch(`/api/v1/finance/repayments/${repaymentId}/send-reminder`, {
-        method: 'POST',
-      })
-      if (!response.ok) {
-        throw new Error('Failed to send reminder')
-      }
+      await apiService.sendReminder(repaymentId, 'email')
       // Show success message (could use a toast notification)
       alert('Reminder sent successfully')
     } catch (err) {
@@ -589,21 +644,11 @@ const FinanceDashboard = ({ onLogout }) => {
 
   const handleDownloadReport = async () => {
     try {
-      const params = new URLSearchParams()
-      if (repaymentFilters.status) params.append('status', repaymentFilters.status)
-      if (repaymentFilters.dateFrom) params.append('dateFrom', repaymentFilters.dateFrom)
-      if (repaymentFilters.dateTo) params.append('dateTo', repaymentFilters.dateTo)
-      if (repaymentFilters.searchQuery) params.append('searchQuery', repaymentFilters.searchQuery)
-
-      const response = await fetch(`/api/v1/finance/repayments/report/download?${params.toString()}`)
-      if (!response.ok) {
-        throw new Error('Report download failed')
-      }
-      const blob = await response.blob()
+      const { blob, filename } = await apiService.downloadRepaymentsReport()
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', `repayment-report-${new Date().toISOString().slice(0, 10)}.xlsx`)
+      link.setAttribute('download', `${filename}-${new Date().toISOString().slice(0, 10)}.csv`)
       document.body.appendChild(link)
       link.click()
       link.remove()
@@ -611,6 +656,23 @@ const FinanceDashboard = ({ onLogout }) => {
     } catch (err) {
       console.warn('[FinanceDashboard] Report download failed:', err.message)
       alert('Report download initiated (demo mode)')
+    }
+  }
+
+  const handleDownloadDisbursementsReport = async () => {
+    try {
+      const { blob, filename } = await apiService.downloadDisbursementsReport()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `${filename}-${new Date().toISOString().slice(0, 10)}.csv`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.warn('[FinanceDashboard] Disbursement report download failed:', err.message)
+      alert('Disbursement report download initiated (demo mode)')
     }
   }
 
@@ -625,29 +687,64 @@ const FinanceDashboard = ({ onLogout }) => {
     else if (title === 'Notifications') setShowNotificationModal(true)
   }
 
-  const handleAddTenantSubmit = () => {
+  const handleAddTenantSubmit = async () => {
     if (!tenantForm.name || !tenantForm.email) {
       alert('Please enter tenant name and email')
       return
     }
-    const list = [...tenants, { id: Date.now(), ...tenantForm }]
-    setTenants(list)
+    
     try {
-      localStorage.setItem('tenants', JSON.stringify(list))
-    } catch {}
-    setShowTenantModal(false)
-    setTenantForm({ name: '', type: 'Bank', email: '', active: true })
-    alert('Tenant added')
+      // Save to backend
+      await apiService.createTenant(tenantForm)
+      
+      const list = [...tenants, { id: Date.now(), ...tenantForm }]
+      setTenants(list)
+      try {
+        localStorage.setItem('tenants', JSON.stringify(list))
+      } catch {}
+      setShowTenantModal(false)
+      setTenantForm({ name: '', type: 'Bank', email: '', active: true })
+      alert('Tenant added successfully')
+    } catch (err) {
+      console.warn('[FinanceDashboard] Failed to add tenant to backend:', err.message)
+      // Still save locally for demo purposes
+      const list = [...tenants, { id: Date.now(), ...tenantForm }]
+      setTenants(list)
+      try {
+        localStorage.setItem('tenants', JSON.stringify(list))
+      } catch {}
+      setShowTenantModal(false)
+      setTenantForm({ name: '', type: 'Bank', email: '', active: true })
+      alert('Tenant added (local storage)')
+    }
   }
 
-  const handleSaveSettings = (next) => {
+  const handleSaveSettings = async (next) => {
     const merged = { ...settings, ...next }
-    setSettings(merged)
+    
     try {
-      localStorage.setItem('settings', JSON.stringify(merged))
-    } catch {}
-    setShowSettingsModal(false)
-    alert('Settings saved')
+      // Save to backend
+      await apiService.updateSetting(1, {
+        email_notifications: merged.emailNotifications,
+        sms_notifications: merged.smsNotifications,
+      })
+      
+      setSettings(merged)
+      try {
+        localStorage.setItem('settings', JSON.stringify(merged))
+      } catch {}
+      setShowSettingsModal(false)
+      alert('Settings saved successfully')
+    } catch (err) {
+      console.warn('[FinanceDashboard] Failed to save settings to backend:', err.message)
+      // Still save locally for demo purposes
+      setSettings(merged)
+      try {
+        localStorage.setItem('settings', JSON.stringify(merged))
+      } catch {}
+      setShowSettingsModal(false)
+      alert('Settings saved (local storage)')
+    }
   }
 
   const handleManageDisbursement = (row) => {
@@ -655,20 +752,43 @@ const FinanceDashboard = ({ onLogout }) => {
     setShowManageDisbursementModal(true)
   }
 
-  const updateDisbursementStatus = (newStatus) => {
-    setDisbursementData((prev) => {
-      const snapshot = prev ?? mockDashboard.disbursement
-      const updated = {
-        ...snapshot,
-        allDisbursements: snapshot.allDisbursements.map((d) =>
-          d.disbursementId === selectedDisbursement.disbursementId ? { ...d, status: newStatus } : d
-        ),
-      }
-      return updated
-    })
-    setShowManageDisbursementModal(false)
-    setSelectedDisbursement(null)
-    alert(`Status updated to ${newStatus}`)
+  const updateDisbursementStatus = async (newStatus) => {
+    try {
+      // Update disbursement in backend
+      await apiService.updateDisbursement(selectedDisbursement.id, {
+        status: newStatus
+      })
+      
+      setDisbursementData((prev) => {
+        const snapshot = prev ?? mockDashboard.disbursement
+        const updated = {
+          ...snapshot,
+          allDisbursements: snapshot.allDisbursements.map((d) =>
+            d.disbursementId === selectedDisbursement.disbursementId ? { ...d, status: newStatus } : d
+          ),
+        }
+        return updated
+      })
+      setShowManageDisbursementModal(false)
+      setSelectedDisbursement(null)
+      alert(`Status updated to ${newStatus}`)
+    } catch (err) {
+      console.warn('[FinanceDashboard] Failed to update disbursement:', err.message)
+      // Still update locally for demo purposes
+      setDisbursementData((prev) => {
+        const snapshot = prev ?? mockDashboard.disbursement
+        const updated = {
+          ...snapshot,
+          allDisbursements: snapshot.allDisbursements.map((d) =>
+            d.disbursementId === selectedDisbursement.disbursementId ? { ...d, status: newStatus } : d
+          ),
+        }
+        return updated
+      })
+      setShowManageDisbursementModal(false)
+      setSelectedDisbursement(null)
+      alert(`Status updated to ${newStatus} (local)`)
+    }
   }
 
   return (
@@ -1473,7 +1593,7 @@ const FinanceDashboard = ({ onLogout }) => {
                                 <td className="py-3 pr-4 font-semibold text-brand-text">{row.transactionId}</td>
                                 <td className="py-3 pr-4">{row.transactionDate}</td>
                                 <td className="py-3 pr-4">{row.description}</td>
-                                <td className="py-3 pr-4 font-semibold">{formatCurrency(Math.round(row.amount * 100))}</td>
+                                  <td className="py-3 pr-4 font-semibold">{formatCurrency(row.amount)}</td>
                                 <td className="py-3 pr-4">
                                   <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${reconciliationStatusBadge(row.status)}`}>
                                     {row.status}
@@ -1835,8 +1955,9 @@ const FinanceDashboard = ({ onLogout }) => {
             </div>
             <div className="space-y-4 px-6 py-4">
               <p className="text-sm text-slate-600">Choose a report to download</p>
-              <button onClick={() => { setShowReportsModal(false); handleGenerateReport() }} className="w-full rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">Finance Summary (PDF)</button>
-              <button onClick={() => { setShowReportsModal(false); handleDownloadReport() }} className="w-full rounded-lg border border-brand-border px-4 py-2 text-sm font-semibold text-brand-text transition hover:border-brand-accent">Repayment Report (XLSX)</button>
+              <button onClick={() => { setShowReportsModal(false); handleGenerateReport() }} className="w-full rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500">Finance Summary (HTML)</button>
+              <button onClick={() => { setShowReportsModal(false); handleDownloadReport() }} className="w-full rounded-lg border border-brand-border px-4 py-2 text-sm font-semibold text-brand-text transition hover:border-brand-accent">Repayment Report (CSV)</button>
+              <button onClick={() => { setShowReportsModal(false); handleDownloadDisbursementsReport() }} className="w-full rounded-lg border border-brand-border px-4 py-2 text-sm font-semibold text-brand-text transition hover:border-brand-accent">Disbursement Report (CSV)</button>
             </div>
           </div>
         </div>

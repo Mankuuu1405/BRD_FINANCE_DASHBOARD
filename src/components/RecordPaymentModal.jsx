@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import apiService from '../services/api'
 
 const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -21,8 +22,7 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
   useEffect(() => {
     if (isOpen) {
       // Fetch repayment options for searchable dropdown
-      fetch('/api/v1/finance/repayments/list?status=ALL_REPAYMENTS')
-        .then((res) => res.json())
+      apiService.getLegacyRepaymentList({ status: 'ALL_REPAYMENTS' })
         .then((data) => {
           if (data.repayments) {
             setRepaymentOptions(data.repayments)
@@ -41,20 +41,10 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
     setLoading(true)
 
     try {
-      const response = await fetch(`/api/v1/finance/repayments/${formData.repaymentId}/record`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentAmount: parseFloat(formData.paymentAmount),
-          paymentDate: formData.paymentDate,
-          channel: formData.channel,
-          transactionId: formData.transactionId || undefined,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to record payment')
-      }
+      await apiService.recordPayment(
+        formData.repaymentId,
+        parseFloat(formData.paymentAmount)
+      )
 
       onSuccess?.()
       onClose()
