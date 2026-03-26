@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  ResponsiveContainer,
   LineChart,
   Line,
   XAxis,
@@ -21,6 +20,7 @@ import KpiCard from './KpiCard'
 import RecordPaymentModal from './RecordPaymentModal'
 import NotificationModal from './NotificationModal'
 import ProfileModal from './ProfileModal'
+import SafeResponsiveContainer from './SafeResponsiveContainer'
 import { mockDashboard } from '../data/mockDashboard'
 import { formatCurrency, formatPercent } from '../utils/formatters'
 import apiService from '../services/api'
@@ -536,7 +536,7 @@ const FinanceDashboard = ({ onLogout }) => {
       alert('Reminder sent successfully')
     } catch (err) {
       console.warn('[FinanceDashboard] Send reminder failed:', err.message)
-      alert('Reminder sent (demo mode)')
+      alert(err.message || 'Unable to send reminder. Please try again.')
     }
   }
 
@@ -903,7 +903,7 @@ const FinanceDashboard = ({ onLogout }) => {
                 <section className="grid gap-4 lg:grid-cols-2">
                   <ChartCard title="Disbursement Trends" subtitle="Monthly disbursements (₹ in Millions)">
                     <div className="h-56 sm:h-72">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <SafeResponsiveContainer>
                         <LineChart data={disbursementTrends}>
                           <CartesianGrid strokeDasharray="4 4" stroke="#dbeafe" />
                           <XAxis dataKey="month" stroke="#94a3b8" tick={{ fill: '#4b6cb7', fontSize: 11 }} />
@@ -911,13 +911,13 @@ const FinanceDashboard = ({ onLogout }) => {
                           <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: 12, borderColor: '#dbeafe' }} labelStyle={{ color: '#1d4ed8' }} formatter={(value) => [`${value}M`, 'Disbursed']} />
                           <Line type="monotone" dataKey="disbursed" stroke="#2563eb" strokeWidth={3} dot={{ r: 4, stroke: '#2563eb', fill: '#fff' }} activeDot={{ r: 6 }} />
                         </LineChart>
-                      </ResponsiveContainer>
+                      </SafeResponsiveContainer>
                     </div>
                   </ChartCard>
 
                   <ChartCard title="Collection Performance" subtitle="Expected vs actual collections (₹ in Millions)">
                     <div className="h-56 sm:h-72">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <SafeResponsiveContainer>
                         <BarChart data={collectionPerformance} barCategoryGap={20}>
                           <CartesianGrid strokeDasharray="4 4" stroke="#dbeafe" />
                           <XAxis dataKey="month" stroke="#94a3b8" tick={{ fill: '#4b6cb7', fontSize: 11 }} />
@@ -927,7 +927,7 @@ const FinanceDashboard = ({ onLogout }) => {
                           <Bar dataKey="expected" fill="#cbdcfb" radius={[8, 8, 0, 0]} />
                           <Bar dataKey="actual" fill="#5a8dee" radius={[8, 8, 0, 0]} />
                         </BarChart>
-                      </ResponsiveContainer>
+                      </SafeResponsiveContainer>
                     </div>
                   </ChartCard>
                 </section>
@@ -936,7 +936,7 @@ const FinanceDashboard = ({ onLogout }) => {
                   <ChartCard compact title="Payment Status Distribution" subtitle="Share of outstanding loans by repayment status">
                     <div className="flex flex-col sm:flex-row items-center gap-3">
                       <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <SafeResponsiveContainer>
                           <PieChart>
                             <Pie data={paymentStatusDistribution} dataKey="value" nameKey="status" cx="50%" cy="50%" innerRadius={0} outerRadius="85%" stroke="none">
                               {paymentStatusDistribution.map((entry) => (
@@ -945,7 +945,7 @@ const FinanceDashboard = ({ onLogout }) => {
                             </Pie>
                             <Tooltip formatter={(value, name) => [`${value}%`, name]} contentStyle={{ backgroundColor: '#fff', borderRadius: 12, borderColor: '#dbeafe' }} />
                           </PieChart>
-                        </ResponsiveContainer>
+                        </SafeResponsiveContainer>
                       </div>
                       <div className="flex-1 w-full">
                         <DonutLegend items={paymentStatusDistribution.map((item) => ({ label: item.status, value: item.value, color: item.color }))} />
@@ -956,7 +956,7 @@ const FinanceDashboard = ({ onLogout }) => {
                   <ChartCard compact title="Loan Portfolio Composition" subtitle="Outstanding value grouped by loan purpose">
                     <div className="flex flex-col sm:flex-row items-center gap-3">
                       <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <SafeResponsiveContainer>
                           <PieChart>
                             <Pie data={loanPortfolioComposition} dataKey="value" nameKey="type" cx="50%" cy="50%" innerRadius={0} outerRadius="85%" stroke="none">
                               {loanPortfolioComposition.map((entry) => (
@@ -965,7 +965,7 @@ const FinanceDashboard = ({ onLogout }) => {
                             </Pie>
                             <Tooltip formatter={(value, name) => [`${value}%`, name]} contentStyle={{ backgroundColor: '#fff', borderRadius: 12, borderColor: '#dbeafe' }} />
                           </PieChart>
-                        </ResponsiveContainer>
+                        </SafeResponsiveContainer>
                       </div>
                       <div className="flex-1 w-full">
                         <DonutLegend items={loanPortfolioComposition.map((item) => ({ label: item.type, value: item.value, color: item.color }))} />
@@ -994,7 +994,7 @@ const FinanceDashboard = ({ onLogout }) => {
                 <section className="grid gap-4 sm:gap-6 lg:grid-cols-2">
                   <ChartCard title="Disbursement by Method" subtitle="Total value split by payment channels">
                     <div className="h-56 sm:h-72">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <SafeResponsiveContainer>
                         <BarChart data={disbursementByMethod} barCategoryGap={20}>
                           <CartesianGrid strokeDasharray="4 4" stroke="#dbeafe" />
                           <XAxis dataKey="method" stroke="#94a3b8" tick={{ fill: '#4b6cb7', fontSize: 11 }} />
@@ -1002,14 +1002,14 @@ const FinanceDashboard = ({ onLogout }) => {
                           <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: 12, borderColor: '#dbeafe' }} labelStyle={{ color: '#1d4ed8' }} formatter={(value) => [formatCurrency(value), 'Amount']} />
                           <Bar dataKey="amount" fill="#1d4ed8" radius={[8, 8, 0, 0]} />
                         </BarChart>
-                      </ResponsiveContainer>
+                      </SafeResponsiveContainer>
                     </div>
                   </ChartCard>
 
                   <ChartCard compact title="Status Distribution" subtitle="Share of transactions by current status">
                     <div className="flex flex-col sm:flex-row items-center gap-3">
                       <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <SafeResponsiveContainer>
                           <PieChart>
                             <Pie data={disbursementStatusDistribution} dataKey="count" nameKey="status" cx="50%" cy="50%" innerRadius={0} outerRadius="85%" stroke="none">
                               {disbursementStatusDistribution.map((entry) => (
@@ -1018,7 +1018,7 @@ const FinanceDashboard = ({ onLogout }) => {
                             </Pie>
                             <Tooltip formatter={(value, name) => [`${value} txns`, name]} contentStyle={{ backgroundColor: '#fff', borderRadius: 12, borderColor: '#dbeafe' }} />
                           </PieChart>
-                        </ResponsiveContainer>
+                        </SafeResponsiveContainer>
                       </div>
                       <div className="flex-1 w-full">
                         <DonutLegend items={disbursementStatusDistribution.map((item) => ({ label: item.status, value: item.count, color: item.color }))} />
@@ -1164,7 +1164,7 @@ const FinanceDashboard = ({ onLogout }) => {
                         <ChartCard compact title="Status Distribution" subtitle="Transaction status breakdown">
                           <div className="flex flex-col sm:flex-row items-center gap-3">
                             <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0">
-                              <ResponsiveContainer width="100%" height="100%">
+                              <SafeResponsiveContainer>
                                 <PieChart>
                                   <Pie data={statusDistribution} dataKey="count" nameKey="status" cx="50%" cy="50%" innerRadius={0} outerRadius="85%" stroke="none">
                                     {statusDistribution.map((entry) => (
@@ -1173,7 +1173,7 @@ const FinanceDashboard = ({ onLogout }) => {
                                   </Pie>
                                   <Tooltip formatter={(value, name) => [`${value} txns`, name]} contentStyle={{ backgroundColor: '#fff', borderRadius: 12, borderColor: '#dbeafe' }} />
                                 </PieChart>
-                              </ResponsiveContainer>
+                              </SafeResponsiveContainer>
                             </div>
                             <div className="flex-1 w-full">
                               <DonutLegend items={statusDistribution.map((item) => ({ label: item.status, value: item.percentage.toFixed(1), color: item.color }))} />

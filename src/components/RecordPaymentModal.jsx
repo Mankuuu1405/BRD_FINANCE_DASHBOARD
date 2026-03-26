@@ -36,13 +36,35 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
+
+    const normalizedRepaymentId = String(formData.repaymentId || '').trim()
+    const parsedAmount = parseFloat(formData.paymentAmount)
+    if (!normalizedRepaymentId) {
+      setError('Repayment ID is required.')
+      return
+    }
+    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+      setError('Enter a valid payment amount greater than 0.')
+      return
+    }
+
+    if (repaymentOptions.length > 0) {
+      const idExists = repaymentOptions.some((rep) => rep.repaymentId === normalizedRepaymentId)
+      if (!idExists) {
+        setError('Repayment ID not found in current list. Please pick a valid ID from Repayment module.')
+        return
+      }
+    }
+
     setLoading(true)
 
     try {
-      await apiService.recordPayment(
-        formData.repaymentId,
-        parseFloat(formData.paymentAmount)
-      )
+      await apiService.recordPayment(normalizedRepaymentId, {
+        amount: parsedAmount,
+        paymentDate: formData.paymentDate,
+        channel: formData.channel,
+        transactionId: formData.transactionId,
+      })
 
       onSuccess?.()
       onClose()
@@ -54,16 +76,8 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
         transactionId: '',
       })
     } catch (err) {
-      console.warn('[RecordPaymentModal] API call failed, updating local state:', err.message)
-      onSuccess?.()
-      onClose()
-      setFormData({
-        repaymentId: '',
-        paymentAmount: '',
-        paymentDate: new Date().toISOString().split('T')[0],
-        channel: '',
-        transactionId: '',
-      })
+      console.warn('[RecordPaymentModal] API call failed:', err.message)
+      setError(err.message || 'Unable to record payment. Please verify Repayment ID and try again.')
     } finally {
       setLoading(false)
     }

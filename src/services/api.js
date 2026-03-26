@@ -33,12 +33,25 @@ class APIService {
     })
 
     if (!response.ok) {
+      let details = ''
+      try {
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('application/json')) {
+          const payload = await response.json()
+          details = payload?.error || payload?.detail || JSON.stringify(payload)
+        } else {
+          details = (await response.text())?.trim()
+        }
+      } catch {
+        details = ''
+      }
+
       if (response.status === 401) {
         localStorage.removeItem('token')
         // Don't redirect - just throw error to be caught by components
         // window.location.href = '/login'
       }
-      throw new Error(`API Error: ${response.statusText}`)
+      throw new Error(`API Error ${response.status}: ${details || response.statusText}`)
     }
 
     return response.json()
@@ -164,15 +177,20 @@ class APIService {
     return this.request(`/repayments/dashboard/`)
   }
 
-  async recordPayment(id, amount) {
-    return this.request(`/repayments/${id}/record_payment/`, {
+  async recordPayment(repaymentId, paymentData) {
+    const payload = typeof paymentData === 'object' && paymentData !== null
+      ? paymentData
+      : { amount: paymentData }
+
+    // Use legacy repayment-id endpoint because UI works with repayment_id (e.g. REP-2001), not DB pk.
+    return this.request(`/repayments/${repaymentId}/record`, {
       method: 'POST',
-      body: JSON.stringify({ amount }),
+      body: JSON.stringify(payload),
     })
   }
 
-  async sendReminder(id, method = 'email') {
-    return this.request(`/repayments/${id}/send_reminder/`, {
+  async sendReminder(repaymentId, method = 'email') {
+    return this.request(`/repayments/${repaymentId}/send-reminder`, {
       method: 'POST',
       body: JSON.stringify({ method }),
     })
