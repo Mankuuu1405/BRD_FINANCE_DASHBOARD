@@ -5,7 +5,7 @@ const Arrow = ({ direction = 'up' }) => {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="h-4 w-4 fill-none stroke-current"
+      className="h-3 w-3 sm:h-4 sm:w-4 fill-none stroke-current"
       strokeWidth={2}
       aria-hidden="true"
     >
@@ -22,7 +22,7 @@ const TrendBadge = ({ trend }) => {
   const isPositive = trend >= 0
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
+      className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-semibold whitespace-nowrap ${
         isPositive ? 'bg-brand-accent/10 text-brand-accent' : 'bg-blue-900/10 text-blue-900'
       }`}
     >
@@ -50,20 +50,19 @@ const KpiCard = ({
   const valueClass = toneStyles[tone] ?? toneStyles.default
 
   return (
-    <div className="rounded-2xl border border-brand-border bg-brand-panel p-5 shadow-glow">
+    <div className="rounded-2xl border border-brand-border bg-brand-panel p-4 sm:p-5 shadow-glow">
       <div className="relative">
-        <p className="pr-20 sm:pr-24 text-sm font-medium text-slate-500 break-normal whitespace-normal leading-5">{label}</p>
+        <p className="pr-16 sm:pr-20 text-xs sm:text-sm font-medium text-slate-500 break-normal whitespace-normal leading-5">{label}</p>
         <div className="absolute right-0 top-0">
           <TrendBadge trend={typeof trend === 'number' ? trend : null} />
         </div>
       </div>
-      <p className={`mt-2 text-3xl font-semibold ${valueClass}`}>{formattedValue}</p>
+      <p className={`mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-semibold truncate ${valueClass}`}>{formattedValue}</p>
       {helper ? (
-        <p className="mt-2 text-xs text-brand-text/60">{helper}</p>
+        <p className="mt-1 sm:mt-2 text-xs text-brand-text/60 truncate">{helper}</p>
       ) : null}
     </div>
   )
 }
 
 export default KpiCard
-

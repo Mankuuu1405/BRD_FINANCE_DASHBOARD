@@ -1,4 +1,3 @@
-// /Users/ayushpc/Desktop/Finance-team/src/components/SignupPage.jsx
 import { useState } from 'react'
 
 const SignupPage = ({ onSignup, onSwitchToLogin }) => {
@@ -33,19 +32,19 @@ const SignupPage = ({ onSignup, onSwitchToLogin }) => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50">
-      <div className="w-full max-w-md rounded-3xl border border-brand-border bg-white p-8 shadow-xl">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100">
-            <svg viewBox="0 0 24 24" className="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 px-4 py-8">
+      <div className="w-full max-w-md rounded-3xl border border-brand-border bg-white p-6 sm:p-8 shadow-xl">
+        <div className="mb-6 sm:mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-indigo-100">
+            <svg viewBox="0 0 24 24" className="h-7 w-7 sm:h-8 sm:w-8 text-indigo-600" fill="none" stroke="currentColor" strokeWidth={1.8}>
               <path d="M12 3l8 4v5c0 5-3 7-8 9-5-2-8-4-8-9V7z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-semibold text-brand-text">Create your account</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-brand-text">Create your account</h1>
           <p className="mt-2 text-sm text-slate-500">Sign up to access your dashboard</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
             <label className="mb-2 block text-sm font-semibold text-brand-text">Email</label>
             <input
@@ -54,7 +53,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin }) => {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="you@example.com"
               required
-              className="w-full rounded-lg border border-brand-border px-4 py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+              className="w-full rounded-lg border border-brand-border px-4 py-2.5 sm:py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
             />
           </div>
           <div>
@@ -65,7 +64,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin }) => {
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="Enter your password"
               required
-              className="w-full rounded-lg border border-brand-border px-4 py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+              className="w-full rounded-lg border border-brand-border px-4 py-2.5 sm:py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
             />
           </div>
           <div>
@@ -76,7 +75,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin }) => {
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               placeholder="Re-enter your password"
               required
-              className="w-full rounded-lg border border-brand-border px-4 py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+              className="w-full rounded-lg border border-brand-border px-4 py-2.5 sm:py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
             />
           </div>
 
@@ -85,7 +84,7 @@ const SignupPage = ({ onSignup, onSwitchToLogin }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-brand-accent px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:bg-indigo-500 disabled:opacity-50"
+            className="w-full rounded-lg bg-brand-accent px-4 py-2.5 sm:py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:bg-indigo-500 disabled:opacity-50"
           >
             {loading ? 'Creating account...' : 'Sign Up'}
           </button>

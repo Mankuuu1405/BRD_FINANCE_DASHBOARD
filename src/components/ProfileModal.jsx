@@ -36,17 +36,17 @@ const ProfileModal = ({ isOpen, onClose, onLogout }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end p-4 pt-20 bg-black/30 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center sm:justify-end p-3 sm:p-4 pt-16 sm:pt-20 bg-black/30 backdrop-blur-sm" onClick={onClose}>
       <div
         className="w-full max-w-sm rounded-2xl border border-brand-border bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-brand-border px-6 py-4">
+        <div className="border-b border-brand-border px-4 sm:px-6 py-4">
           <div className="flex items-center gap-3">
             {profileImage ? (
-              <img src={profileImage} alt="Profile" className="h-12 w-12 rounded-full object-cover" />
+              <img src={profileImage} alt="Profile" className="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover shrink-0" />
             ) : (
-              <div className="h-12 w-12 rounded-full bg-indigo-100 text-center text-lg font-semibold leading-12 text-indigo-700">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-indigo-100 flex items-center justify-center text-base sm:text-lg font-semibold text-indigo-700 shrink-0">
                 {(displayName || defaultName)
                   .split(' ')
                   .map((n) => n[0])
@@ -55,33 +55,33 @@ const ProfileModal = ({ isOpen, onClose, onLogout }) => {
                   .slice(0, 2)}
               </div>
             )}
-            <div>
-              <p className="text-sm font-semibold text-brand-text">{displayName}</p>
-              <p className="text-xs text-brand-text/60">{userEmail}</p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-brand-text truncate">{displayName}</p>
+              <p className="text-xs text-brand-text/60 truncate">{userEmail}</p>
             </div>
           </div>
         </div>
 
         {view === 'menu' ? (
           <div className="divide-y divide-brand-border">
-            <button onClick={() => setView('profile')} className="flex w-full items-center gap-3 px-6 py-3 text-left text-sm text-brand-text transition hover:bg-slate-50">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 3a3 3 0 000 6 3 3 0 000-6z" /><path d="M12 14v7" /><path d="M5 14h14a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4a2 2 0 012-2z" /></svg>
+            <button onClick={() => setView('profile')} className="flex w-full items-center gap-3 px-4 sm:px-6 py-3 text-left text-sm text-brand-text transition hover:bg-slate-50">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 3a3 3 0 000 6 3 3 0 000-6z" /><path d="M12 14v7" /><path d="M5 14h14a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4a2 2 0 012-2z" /></svg>
               Profile Settings
             </button>
-            <button onClick={() => setView('preferences')} className="flex w-full items-center gap-3 px-6 py-3 text-left text-sm text-brand-text transition hover:bg-slate-50">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 000-6l1.6-2.8-2.6-2.6L15.6 4a1.7 1.7 0 00-6 0L6.8 3.6 4.2 6.2 5.8 9a1.7 1.7 0 000 6l-1.6 2.8 2.6 2.6L8.4 20a1.7 1.7 0 006 0l2.8.4 2.6-2.6z" /></svg>
+            <button onClick={() => setView('preferences')} className="flex w-full items-center gap-3 px-4 sm:px-6 py-3 text-left text-sm text-brand-text transition hover:bg-slate-50">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 000-6l1.6-2.8-2.6-2.6L15.6 4a1.7 1.7 0 00-6 0L6.8 3.6 4.2 6.2 5.8 9a1.7 1.7 0 000 6l-1.6 2.8 2.6 2.6L8.4 20a1.7 1.7 0 006 0l2.8.4 2.6-2.6z" /></svg>
               Preferences
             </button>
-            <button onClick={() => setView('help')} className="flex w-full items-center gap-3 px-6 py-3 text-left text-sm text-brand-text transition hover:bg-slate-50">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01" /></svg>
+            <button onClick={() => setView('help')} className="flex w-full items-center gap-3 px-4 sm:px-6 py-3 text-left text-sm text-brand-text transition hover:bg-slate-50">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01" /></svg>
               Help & Support
             </button>
-            <button onClick={() => { onLogout(); onClose() }} className="flex w-full items-center justify-center gap-2 px-6 py-3 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50">
+            <button onClick={() => { onLogout(); onClose() }} className="flex w-full items-center justify-center gap-2 px-4 sm:px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50">
               Logout
             </button>
           </div>
         ) : view === 'profile' ? (
-          <div className="space-y-4 px-6 py-4">
+          <div className="space-y-4 px-4 sm:px-6 py-4">
             <p className="text-sm font-semibold text-brand-text">Edit Profile</p>
             <div>
               <label className="mb-1 block text-xs font-semibold text-brand-text">Profile Image</label>
@@ -139,24 +139,24 @@ const ProfileModal = ({ isOpen, onClose, onLogout }) => {
             </div>
           </div>
         ) : view === 'preferences' ? (
-          <div className="space-y-4 px-6 py-4">
+          <div className="space-y-4 px-4 sm:px-6 py-4">
             <p className="text-sm font-semibold text-brand-text">Preferences</p>
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0 pr-4">
                 <p className="text-sm font-semibold text-brand-text">Compact Layout</p>
                 <p className="text-xs text-slate-500">Reduce spacing in dashboard</p>
               </div>
               <input type="checkbox" checked={preferences.compactLayout} onChange={(e) => setPreferences({ ...preferences, compactLayout: e.target.checked })} />
             </div>
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0 pr-4">
                 <p className="text-sm font-semibold text-brand-text">Show Tooltips</p>
                 <p className="text-xs text-slate-500">Enable chart tooltips</p>
               </div>
               <input type="checkbox" checked={preferences.showTooltips} onChange={(e) => setPreferences({ ...preferences, showTooltips: e.target.checked })} />
             </div>
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0 pr-4">
                 <p className="text-sm font-semibold text-brand-text">Dark Mode</p>
                 <p className="text-xs text-slate-500">Experimental theme</p>
               </div>
@@ -168,7 +168,7 @@ const ProfileModal = ({ isOpen, onClose, onLogout }) => {
             </div>
           </div>
         ) : (
-          <div className="space-y-4 px-6 py-4">
+          <div className="space-y-4 px-4 sm:px-6 py-4">
             <p className="text-sm font-semibold text-brand-text">Help & Support</p>
             <p className="text-xs text-brand-text/70">For assistance, contact support or browse FAQs.</p>
             <div className="flex gap-3">

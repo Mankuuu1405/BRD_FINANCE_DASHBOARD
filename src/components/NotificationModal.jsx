@@ -6,9 +6,7 @@ const NotificationModal = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
-      // Fetch notifications
       setLoading(true)
-      // Simulate API call
       setTimeout(() => {
         setNotifications([
           {
@@ -64,14 +62,14 @@ const NotificationModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end p-4 pt-20 bg-black/30 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center sm:justify-end p-3 sm:p-4 pt-16 sm:pt-20 bg-black/30 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="w-full max-w-md rounded-2xl border border-brand-border bg-white shadow-xl"
+        className="w-full max-w-sm sm:max-w-md rounded-2xl border border-brand-border bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
-          <h2 className="text-lg font-semibold text-brand-text">Notifications</h2>
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between border-b border-brand-border px-4 sm:px-6 py-4">
+          <h2 className="text-base sm:text-lg font-semibold text-brand-text">Notifications</h2>
+          <div className="flex items-center gap-2 sm:gap-3">
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
@@ -91,7 +89,7 @@ const NotificationModal = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        <div className="max-h-[500px] overflow-y-auto">
+        <div className="max-h-[70vh] sm:max-h-[500px] overflow-y-auto">
           {loading ? (
             <div className="py-8 text-center text-sm text-brand-text/60">Loading notifications...</div>
           ) : notifications.length === 0 ? (
@@ -101,14 +99,14 @@ const NotificationModal = ({ isOpen, onClose }) => {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`px-6 py-4 transition hover:bg-slate-50 ${
+                  className={`px-4 sm:px-6 py-3 sm:py-4 transition hover:bg-slate-50 cursor-pointer ${
                     !notification.read ? 'bg-blue-50/50' : ''
                   }`}
                   onClick={() => markAsRead(notification.id)}
                 >
                   <div className="flex items-start gap-3">
                     <div
-                      className={`mt-1 h-2 w-2 rounded-full ${
+                      className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${
                         !notification.read
                           ? 'bg-brand-accent'
                           : notification.type === 'warning'
@@ -118,10 +116,10 @@ const NotificationModal = ({ isOpen, onClose }) => {
                               : 'bg-slate-300'
                       }`}
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-brand-text">{notification.title}</p>
-                      <p className="mt-1 text-xs text-brand-text/70">{notification.message}</p>
-                      <p className="mt-2 text-xs text-brand-text/50">{notification.time}</p>
+                      <p className="mt-0.5 text-xs text-brand-text/70">{notification.message}</p>
+                      <p className="mt-1.5 text-xs text-brand-text/50">{notification.time}</p>
                     </div>
                   </div>
                 </div>

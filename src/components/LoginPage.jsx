@@ -43,19 +43,19 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
 
   return (
     <>
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50">
-      <div className="w-full max-w-md rounded-3xl border border-brand-border bg-white p-8 shadow-xl">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100">
-            <svg viewBox="0 0 24 24" className="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 px-4 py-8">
+      <div className="w-full max-w-md rounded-3xl border border-brand-border bg-white p-6 sm:p-8 shadow-xl">
+        <div className="mb-6 sm:mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-indigo-100">
+            <svg viewBox="0 0 24 24" className="h-7 w-7 sm:h-8 sm:w-8 text-indigo-600" fill="none" stroke="currentColor" strokeWidth={1.8}>
               <path d="M12 3l8 4v5c0 5-3 7-8 9-5-2-8-4-8-9V7z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-semibold text-brand-text">Finance Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-brand-text">Finance Dashboard</h1>
           <p className="mt-2 text-sm text-slate-500">Sign in to access your dashboard</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
             <label className="mb-2 block text-sm font-semibold text-brand-text">Email</label>
             <input
@@ -64,7 +64,7 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="admin@los.com"
               required
-              className="w-full rounded-lg border border-brand-border px-4 py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+              className="w-full rounded-lg border border-brand-border px-4 py-2.5 sm:py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
             />
           </div>
 
@@ -76,12 +76,12 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="Enter your password"
               required
-              className="w-full rounded-lg border border-brand-border px-4 py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+              className="w-full rounded-lg border border-brand-border px-4 py-2.5 sm:py-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-xs text-brand-text">
+            <label className="flex items-center gap-2 text-xs text-brand-text cursor-pointer">
               <input
                 type="checkbox"
                 checked={rememberMe}
@@ -105,7 +105,7 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-brand-accent px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:bg-indigo-500 disabled:opacity-50"
+            className="w-full rounded-lg bg-brand-accent px-4 py-2.5 sm:py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:bg-indigo-500 disabled:opacity-50"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -122,13 +122,13 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
     {showForgot && (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowForgot(false)}>
         <div className="w-full max-w-sm rounded-2xl border border-brand-border bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
-          <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
+          <div className="flex items-center justify-between border-b border-brand-border px-5 sm:px-6 py-4">
             <h2 className="text-lg font-semibold text-brand-text">Reset Password</h2>
             <button onClick={() => setShowForgot(false)} className="rounded-full p-1 text-brand-text/60 transition hover:bg-brand-border hover:text-brand-text">
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           </div>
-          <form onSubmit={handleForgotSubmit} className="space-y-4 px-6 py-4">
+          <form onSubmit={handleForgotSubmit} className="space-y-4 px-5 sm:px-6 py-4">
             <div>
               <label className="mb-2 block text-sm font-semibold text-brand-text">Email</label>
               <input
@@ -154,4 +154,3 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
 }
 
 export default LoginPage
-

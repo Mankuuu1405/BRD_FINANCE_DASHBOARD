@@ -21,7 +21,6 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
 
   useEffect(() => {
     if (isOpen) {
-      // Fetch repayment options for searchable dropdown
       apiService.getLegacyRepaymentList({ status: 'ALL_REPAYMENTS' })
         .then((data) => {
           if (data.repayments) {
@@ -29,7 +28,6 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
           }
         })
         .catch(() => {
-          // Fallback to empty array if API fails
           setRepaymentOptions([])
         })
     }
@@ -48,7 +46,6 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
 
       onSuccess?.()
       onClose()
-      // Reset form
       setFormData({
         repaymentId: '',
         paymentAmount: '',
@@ -58,7 +55,6 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
       })
     } catch (err) {
       console.warn('[RecordPaymentModal] API call failed, updating local state:', err.message)
-      // For demo purposes, we'll just call onSuccess
       onSuccess?.()
       onClose()
       setFormData({
@@ -76,10 +72,10 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-brand-border bg-brand-panel p-6 shadow-xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-brand-text">Record Payment</h2>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4">
+      <div className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-brand-border bg-brand-panel p-5 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+        <div className="mb-5 sm:mb-6 flex items-center justify-between">
+          <h2 className="text-xl sm:text-2xl font-semibold text-brand-text">Record Payment</h2>
           <button
             onClick={onClose}
             className="rounded-full p-1 text-brand-text/60 transition hover:bg-brand-border hover:text-brand-text"
@@ -200,4 +196,3 @@ const RecordPaymentModal = ({ isOpen, onClose, repaymentId: prefillRepaymentId, 
 }
 
 export default RecordPaymentModal
-
